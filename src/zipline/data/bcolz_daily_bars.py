@@ -296,7 +296,7 @@ class BcolzDailyBarWriter(object):
             total_rows += nrows
 
             table_day_to_session = compose(
-                self._calendar.minute_to_session_label,
+                self._calendar.minute_to_session,
                 partial(Timestamp, unit="s", tz="UTC"),
             )
             asset_first_day = table_day_to_session(table["day"][0])

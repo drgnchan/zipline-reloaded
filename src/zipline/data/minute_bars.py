@@ -443,7 +443,7 @@ class BcolzMinuteBarWriter(object):
         self._ohlc_ratios_per_sid = ohlc_ratios_per_sid
 
         self._minute_index = _calc_minute_index(
-            self._schedule.market_open, self._minutes_per_day
+            self._schedule.open, self._minutes_per_day
         )
 
         if write_metadata:

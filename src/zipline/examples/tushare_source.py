@@ -106,7 +106,7 @@ def get_basic_info(show_progress=True):
         histories[index] = pro.daily(**{
             "ts_code": row['ts_code'],
             "trade_date": "",
-            "start_date": "",
+            "start_date": "20200819",
             "end_date": "",
             "offset": "",
             "limit": ""

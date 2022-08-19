@@ -11,7 +11,7 @@ b.register(
     bundle,
     ts.tushare_bundle,
     calendar_name='XSHG',
-    start_session=pd.Timestamp("2001-05-22")
+    start_session=pd.Timestamp("2020-08-19")
 )
 
 b.ingest(bundle)
