@@ -787,7 +787,7 @@ class AssetFinder(object):
         # company/share class parts then share_class_symbol will be empty
         company_symbol, share_class_symbol = split_delimited_symbol(symbol)
         try:
-            owners = ownership_map[company_symbol, share_class_symbol]
+            owners = ownership_map[company_symbol, 'SZ']
             assert owners, "empty owners list for %r" % symbol
         except KeyError:
             # no equity has ever held this symbol
@@ -816,6 +816,8 @@ class AssetFinder(object):
         options = []
         country_codes = []
         for start, end, sid, _ in owners:
+            start = start.tz_localize(None)
+            end = end.tz_localize(None)
             if start <= as_of_date < end:
                 # find the equity that owned it on the given asof date
                 asset = self.retrieve_asset(sid)

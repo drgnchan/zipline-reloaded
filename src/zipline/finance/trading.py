@@ -37,16 +37,18 @@ class SimulationParameters(object):
         arena="backtest",
     ):
 
+        start_session = pd.Timestamp(start_session)
+        end_session = pd.Timestamp(end_session)
         assert type(start_session) == pd.Timestamp
         assert type(end_session) == pd.Timestamp
 
         assert trading_calendar is not None, "Must pass in trading calendar!"
         assert start_session <= end_session, "Period start falls after period end."
         assert (
-            start_session <= trading_calendar.last_trading_session
+            start_session <= trading_calendar.last_session
         ), "Period start falls after the last known trading day."
         assert (
-            end_session >= trading_calendar.first_trading_session
+            end_session >= trading_calendar.first_session
         ), "Period end falls before the first known trading day."
 
         # chop off any minutes or hours on the given start and end dates,
@@ -79,10 +81,10 @@ class SimulationParameters(object):
                 self._end_session, direction="previous"
             )
 
-        self._first_open = trading_calendar.open_and_close_for_session(
+        self._first_open = trading_calendar.session_open_close(
             self._start_session
         )[0]
-        self._last_close = trading_calendar.open_and_close_for_session(
+        self._last_close = trading_calendar.session_open_close(
             self._end_session
         )[1]
 

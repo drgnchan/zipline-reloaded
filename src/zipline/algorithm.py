@@ -21,6 +21,7 @@ import logbook
 import pytz
 import pandas as pd
 import numpy as np
+from exchange_calendars.us_futures_calendar import QuantopianUSFuturesCalendar
 
 from itertools import chain, repeat
 
@@ -485,7 +486,7 @@ class TradingAlgorithm(object):
         If the clock property is not set, then create one based on frequency.
         """
         trading_o_and_c = self.trading_calendar.schedule.loc[self.sim_params.sessions]
-        market_closes = trading_o_and_c["market_close"]
+        market_closes = trading_o_and_c["close"]
         minutely_emission = False
 
         if self.sim_params.data_frequency == "minute":
@@ -508,14 +509,14 @@ class TradingAlgorithm(object):
         else:
             # in daily mode, we want to have one bar per session, timestamped
             # as the last minute of the session.
-            execution_closes = self.trading_calendar.execution_time_from_close(
+            execution_closes = QuantopianUSFuturesCalendar().execution_time_from_close(
                 market_closes
             )
             execution_opens = execution_closes
 
         # FIXME generalize these values
         before_trading_start_minutes = days_at_time(
-            self.sim_params.sessions, time(8, 45), "US/Eastern"
+            self.sim_params.sessions, time(8, 45), "US/Eastern", day_offset=0
         )
 
         return MinuteSimulationClock(

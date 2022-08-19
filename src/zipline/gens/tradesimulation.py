@@ -157,6 +157,7 @@ class AlgorithmSimulator(object):
             current_data=self.current_data,
             data_portal=self.data_portal,
         ):
+            data_portal._adjustment_reader = None
             # process any capital changes that came overnight
             for capital_change in algo.calculate_capital_changes(
                 midnight_dt, emission_rate=emission_rate, is_interday=True
@@ -167,6 +168,7 @@ class AlgorithmSimulator(object):
             self.simulation_dt = midnight_dt
             algo.on_dt_changed(midnight_dt)
 
+            midnight_dt.tz_localize(None)
             metrics_tracker.handle_market_open(
                 midnight_dt,
                 algo.data_portal,

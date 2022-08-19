@@ -16,6 +16,7 @@ import logbook
 
 from ..ledger import Ledger
 from zipline.utils.exploding_object import NamedExplodingObject
+from exchange_calendars.us_futures_calendar import QuantopianUSFuturesCalendar
 
 
 log = logbook.Logger(__name__)
@@ -55,9 +56,9 @@ class MetricsTracker(object):
 
     @staticmethod
     def _execution_open_and_close(calendar, session):
-        open_, close = calendar.open_and_close_for_session(session)
-        execution_open = calendar.execution_time_from_open(open_)
-        execution_close = calendar.execution_time_from_close(close)
+        open_, close = calendar.session_open_close(session)
+        execution_open = QuantopianUSFuturesCalendar().execution_time_from_open(open_dates=open_)
+        execution_close = QuantopianUSFuturesCalendar().execution_time_from_close(close_dates=close)
 
         return execution_open, execution_close
 
@@ -264,9 +265,8 @@ class MetricsTracker(object):
                 self._asset_finder,
                 adjustment_reader,
             )
-
+        session_label = session_label.tz_localize(None)
         self._current_session = session_label
-
         cal = self._trading_calendar
         self._market_open, self._market_close = self._execution_open_and_close(
             cal,

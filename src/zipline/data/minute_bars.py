@@ -226,8 +226,8 @@ class BcolzMinuteBarMetadata(object):
 
             if version >= 2:
                 calendar = get_calendar(raw_data["calendar_name"])
-                start_session = pd.Timestamp(raw_data["start_session"], tz="UTC")
-                end_session = pd.Timestamp(raw_data["end_session"], tz="UTC")
+                start_session = pd.Timestamp(raw_data["start_session"])
+                end_session = pd.Timestamp(raw_data["end_session"])
             else:
                 # No calendar info included in older versions, so
                 # default to NYSE.
@@ -910,11 +910,11 @@ class BcolzMinuteBarReader(MinuteBarReader):
             self._end_session,
         )
         self._schedule = self.calendar.schedule[slicer]
-        self._market_opens = self._schedule.market_open
+        self._market_opens = self._schedule.open
         self._market_open_values = self._market_opens.values.astype(
             "datetime64[m]"
         ).astype(np.int64)
-        self._market_closes = self._schedule.market_close
+        self._market_closes = self._schedule.close
         self._market_close_values = self._market_closes.values.astype(
             "datetime64[m]"
         ).astype(np.int64)
@@ -950,7 +950,7 @@ class BcolzMinuteBarReader(MinuteBarReader):
 
     @lazyval
     def last_available_dt(self):
-        _, close = self.calendar.open_and_close_for_session(self._end_session)
+        _, close = self.calendar.session_open_close(self._end_session)
         return close
 
     @property

@@ -186,7 +186,7 @@ cdef class BarData:
         if self._daily_mode:
             # if we're in daily mode, take the given dt (which is the last
             # minute of the session) and get the session label for it.
-            dt = self.data_portal.trading_calendar.minute_to_session_label(dt)
+            dt = self.data_portal.trading_calendar.minute_to_session(dt)
 
         return dt
 

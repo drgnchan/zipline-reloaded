@@ -248,7 +248,7 @@ class DataPortal(object):
         }
 
         self._daily_aggregator = DailyHistoryAggregator(
-            self.trading_calendar.schedule.market_open,
+            self.trading_calendar.schedule.open,
             _dispatch_minute_reader,
             self.trading_calendar,
         )
@@ -273,14 +273,14 @@ class DataPortal(object):
 
         # Get the first trading minute
         self._first_trading_minute, _ = (
-            self.trading_calendar.open_and_close_for_session(self._first_trading_day)
+            self.trading_calendar.session_open_close(self._first_trading_day)
             if self._first_trading_day is not None
             else (None, None)
         )
 
         # Store the locs of the first day and first minute
         self._first_trading_day_loc = (
-            self.trading_calendar.all_sessions.get_loc(self._first_trading_day)
+            self.trading_calendar.sessions.get_loc(self._first_trading_day)
             if self._first_trading_day is not None
             else None
         )
@@ -420,11 +420,13 @@ class DataPortal(object):
 
         if field not in BASE_FIELDS:
             raise KeyError("Invalid column: " + str(field))
-
+        start_date = asset.start_date.tz_localize(None)
+        end_date = asset.end_date.tz_localize(None)
+        dt = dt.tz_localize(None)
         if (
-            dt < asset.start_date
-            or (data_frequency == "daily" and session_label > asset.end_date)
-            or (data_frequency == "minute" and session_label > asset.end_date)
+            dt < start_date
+            or (data_frequency == "daily" and session_label > end_date)
+            or (data_frequency == "minute" and session_label > end_date)
         ):
             if field == "volume":
                 return 0
@@ -497,7 +499,7 @@ class DataPortal(object):
                     "Unexpected 'assets' value of type {}.".format(type(assets))
                 )
 
-        session_label = self.trading_calendar.minute_to_session_label(dt)
+        session_label = self.trading_calendar.minute_to_session(dt)
 
         if assets_is_scalar:
             return self._get_single_asset_value(
@@ -549,7 +551,7 @@ class DataPortal(object):
             'last_traded' the value will be a Timestamp.
         """
         return self._get_single_asset_value(
-            self.trading_calendar.minute_to_session_label(dt),
+            self.trading_calendar.minute_to_session(dt),
             asset,
             field,
             dt,
