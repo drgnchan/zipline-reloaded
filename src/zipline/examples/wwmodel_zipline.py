@@ -8,10 +8,8 @@ import zipline as zp
 from scipy.stats import norm
 from zipline.api import order_target, symbol
 from zipline import run_algorithm
-from zipline.finance import commission
+from zipline.finance import commission, slippage
 from pandas import Timestamp
-from zipline import TradingAlgorithm
-import tushare as ts
 
 
 def initialize(context):
@@ -21,12 +19,12 @@ def initialize(context):
 
 # 设置期权参数
 def set_options(context):
-    context.securities = '000001.XSHE'  # 回测标的
-    context.securities_x = '000001'  # 回测标的
+    context.securities = '002156.XSHE'  # 回测标的
+    context.securities_x = '002156'  # 回测标的
     context.K = 1
     context.T = 30  # 合约期限
     context.rf = 0.09  # 无风险利率
-    context.sigma = secstd(context)
+    context.sigma = volatility(context)
     context.S0 = secinitialprice(context)
     context.startdate = context.sim_params.start_session.date()
     context.maturity = calculate_maturity(context)
@@ -112,7 +110,7 @@ def handle_data(context, data):
         price = jqdata.get_price(context.securities, count=1, end_date=current_date, frequency='minute', fields='close',
                                  skip_paused=False, fq='pre')
         currentdelta = DeltaCalculator(context, price.iloc[0, 0])
-        threshold = WhalleyWilmottThrehold(context, price.iloc[0, 0])
+        threshold = WhalleyWilmottThreshold(context, price.iloc[0, 0])
 
         if abs(context.lastdelta - currentdelta) > threshold:
             print(f'delta之差绝对值超过B[{threshold}]')
@@ -123,7 +121,7 @@ def handle_data(context, data):
 
 
 # 波动率
-def secstd(context):
+def volatility(context):
     end_date: Timestamp = context.datetime
     start_date = end_date.date() - datetime.timedelta(days=365)
     price = jqdata.get_price(context.securities, start_date=start_date, end_date=end_date, frequency='daily',
@@ -172,7 +170,7 @@ def GammaCalculator(context, S):
 
 
 # 风险参数
-def WhalleyWilmottThrehold(context, S):
+def WhalleyWilmottThreshold(context, S):
     current_date = context.datetime.date()
     risktolerance = 5
     tradingcost = 0.00055

@@ -91,7 +91,8 @@ def get_basic_info(show_progress=True):
 
     # 获取股票数据
     i = 0
-    ts_symbols = ts_symbols[0:1]
+    ts_symbols = ts_symbols.loc[ts_symbols['ts_code'] == '002156.SZ']
+    ts_symbols = ts_symbols.reset_index(drop=True)
     total = len(ts_symbols)
     for index, row in ts_symbols.iterrows():
         i = i + 1
